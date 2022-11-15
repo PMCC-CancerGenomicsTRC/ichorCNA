@@ -36,7 +36,7 @@ genomeStyle <- opt$genomeStyle
 #ylim <- eval(parse(text = opt$ylim))
 maleChrXLogRThres <- opt$maleChrXLogRThres
 chrs <- as.character(eval(parse(text = opt$chrs)))
-chrNormalize <- as.character(eval(parse(text=opt$chrNormalize))); 
+chrNormalize <- as.character(eval(parse(text=opt$chrNormalize)));
 seqlevelsStyle(chrs) <- genomeStyle
 seqlevelsStyle(chrNormalize) <- genomeStyle
 
@@ -67,7 +67,7 @@ for (i in 1:length(files)){
 	} else {
 	  map <- wigToGRanges(mapWig)
 	}
-		
+
 	## FILTER BY EXONS IF PROVIDED ##
 	## add gc and map to RangedData object ##
 	if (!is.null(exons.bed)){
@@ -75,9 +75,10 @@ for (i in 1:length(files)){
 	}else{
 		targetedSequences <- NULL
 	}
-	normal_counts <- loadReadCountsFromWig(normal_reads, chrs=chrs, gc=gc, map=map, 
-					centromere=centromere, targetedSequences=targetedSequences)
-	
+	print(sid)
+	normal_counts <- loadReadCountsFromWig(normal_reads, chrs=chrs, gc=gc, map=map,
+					centromere=centromere, targetedSequences=targetedSequences, genomeStyle = genomeStyle, chrNormalize = chrNormalize)
+
 	gender <- normal_counts$gender
 
 	### CORRECT TUMOUR DATA FOR GC CONTENT AND MAPPABILITY BIASES ###
@@ -89,13 +90,13 @@ for (i in 1:length(files)){
 	}else{
 		values(normalGR)[[sid]] <- normal_counts$counts$copy
 	}
-	
+
 	chrXMedian <- gender$chrXMedian
 	chrXStr <- grep("X", chrs, value = TRUE)
 	chrXInd <- as.character(seqnames(normalGR)) == chrXStr
 	## Normalize chrX ##
 	values(normalGR)[[sid]][chrXInd] <- values(normalGR)[[sid]][chrXInd] - chrXMedian
-	
+
 }
 
 
@@ -114,3 +115,4 @@ write.table(as.data.frame(normalGR[,"Median"]), file=paste0(outfile, "_", method
 
 ## save GR object ##
 saveRDS(normalGR, file = paste0(outfile, "_", method, ".rds"))
+
